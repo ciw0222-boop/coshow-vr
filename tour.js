@@ -18,7 +18,7 @@ try { await Promise.race([document.fonts.load('700 40px GmarketSans'), new Promi
 const app = document.getElementById('app');
 // 화질: 주소 ?q=high|low 또는 [화질] 단추(기기에 기억). 처음엔 폰·태블릿 = 저화질, PC = 고화질
 const QS = new URLSearchParams(location.search).get('q'), QSAVE = (() => { try { return localStorage.getItem('cvr_q'); } catch (e) { return null; } })();
-const Q = QS || QSAVE || (matchMedia('(pointer:coarse)').matches || innerWidth < 700 ? 'low' : 'high');
+const Q = QS || QSAVE || 'low';   // 기본은 저화질 (고화질은 단추로 고르면 기억)
 const LOW = Q === 'low';                                                        // 저화질 = 빛 번짐 · 스포트라이트 끄고 해상도 낮춤
 const renderer = new THREE.WebGLRenderer({ antialias: !LOW, powerPreference: 'high-performance' });
 renderer.setPixelRatio(LOW ? Math.min(devicePixelRatio, 1) : Math.min(devicePixelRatio * 1.25, 2.5));   // 고화질 = 화면보다 조금 더 촘촘히 그림
