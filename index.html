@@ -27,8 +27,13 @@ header span{display:block;font-size:11px;font-weight:500;opacity:.92;margin-top:
 #modes{right:12px;top:calc(12px + env(safe-area-inset-top));flex-direction:column;align-items:flex-end}
 button{font:inherit;font-size:13px;font-weight:700;border:0;border-radius:999px;padding:9px 14px;background:rgba(11,20,64,.78);color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 2px 10px rgba(0,0,0,.25);cursor:pointer}
 button.on{background:#fff;color:var(--navy)}
+.grp{display:flex;flex-direction:column;align-items:flex-end;gap:5px;background:rgba(11,20,64,.45);padding:6px 8px 8px;border-radius:18px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.grp small{font-size:11px;font-weight:700;letter-spacing:.3px;opacity:.92;margin-right:6px}
+.grp .row{display:flex;gap:6px}
+#selB{font:inherit;font-size:13px;font-weight:700;border:0;border-radius:999px;padding:9px 12px;background:rgba(11,20,64,.78);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.25);cursor:pointer;max-width:220px}
+#selB option{color:#0b1440;background:#fff}
 button.cy{background:linear-gradient(90deg,#1b6dff,#22c8ff)}
-#mini{position:fixed;right:12px;top:calc(262px + env(safe-area-inset-top));width:170px;height:150px;border-radius:12px;background:rgba(11,20,64,.72);box-shadow:0 2px 10px rgba(0,0,0,.3)}
+#mini{position:fixed;right:12px;top:calc(262px + env(safe-area-inset-top));width:220px;height:194px;border-radius:12px;background:rgba(11,20,64,.72);box-shadow:0 2px 10px rgba(0,0,0,.3)}
 #joy{position:fixed;left:22px;bottom:calc(70px + env(safe-area-inset-bottom));width:116px;height:116px;border-radius:50%;background:rgba(11,20,64,.35);border:2px solid rgba(255,255,255,.45);display:none}
 #knob{position:absolute;left:38px;top:38px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.85)}
 #cap{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(11,20,64,.82);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:700;max-width:86vw;text-align:center;display:none;line-height:1.45}
@@ -63,7 +68,8 @@ button.cy{background:linear-gradient(90deg,#1b6dff,#22c8ff)}
 @media(max-width:600px){
  header b{font-size:15px} header img{width:38px;height:38px}
  #modes{left:12px;right:0;top:calc(84px + env(safe-area-inset-top));flex-direction:row;align-items:center;flex-wrap:nowrap;overflow-x:auto;touch-action:pan-x;padding-right:12px}
- #modes button,#zones button{white-space:nowrap;font-size:12px;padding:8px 11px;flex:none}
+ #modes button,#zones button,#selB{white-space:nowrap;font-size:12px;padding:8px 11px;flex:none}
+ .grp{flex-direction:row;align-items:center;padding:4px 6px;flex:none} .grp small{display:none}
  #zones{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;touch-action:pan-x;right:0;padding-right:12px}
  #mini{width:118px;height:104px;top:calc(128px + env(safe-area-inset-top))}
  #note{top:calc(58px + env(safe-area-inset-top))}
@@ -80,15 +86,18 @@ button.cy{background:linear-gradient(90deg,#1b6dff,#22c8ff)}
 <header><img src="badge.png" alt=""><div><b>2026 CO-SHOW 가상 투어</b><span>2026. 11. 18.(수) ~ 21.(토) · 광주 김대중컨벤션센터</span></div></header>
 <div id="note">1027 전시장 시안 기준 개략 배치 · 실제와 다를 수 있음</div>
 <div id="modes" class="bar">
-  <button id="bBird" class="on">🛰 조감</button>
-  <button id="bWalk">🚶 걷기</button>
-  <button id="bTour" class="cy">▶ 자동 투어</button>
+  <div class="grp"><small>VIEW 모드 변경</small><div class="row">
+    <button id="bBird" class="on">🛰 조감</button>
+    <button id="bWalk">🚶 걷기</button>
+    <button id="bTour" class="cy">▶ 자동 투어</button>
+  </div></div>
   <button id="bGal">🖼 시안 모아보기</button>
   <button id="bLight">💡 전시장 조명 켜기</button>
   <button id="bQ">✨ 고화질</button>
+  <select id="selB"><option value="">🏢 컨소시엄 바로 가기</option></select>
   <span id="vrslot"></span>
 </div>
-<canvas id="mini" width="340" height="300"></canvas>
+<canvas id="mini" width="440" height="388"></canvas>
 <div id="zones" class="bar">
   <button data-z="all" class="on">전체</button>
   <button data-z="lobby">로비</button>
@@ -103,6 +112,6 @@ button.cy{background:linear-gradient(90deg,#1b6dff,#22c8ff)}
 <div id="lb"><img alt=""></div>
 <div id="load"><div><img src="badge.png" alt=""><br>공간을 짓는 중…<small>처음 한 번은 조금 걸려요</small></div></div>
 
-<script type="module" src="tour.js?v=9"></script>
+<script type="module" src="tour.js?v=10"></script>
 </body>
 </html>

@@ -1225,6 +1225,18 @@ document.getElementById('bGal').onclick = () => {
   fillSheet('', '', '시안 모아보기', '1027 전시장 시안 + 이전 시안', '누르면 크게 보여요', G, '출처: ' + S27 + ' · 99.전시장시안/전체 수정');
 };
 
+/* ---------- 컨소시엄 바로 가기 ---------- */
+{ const sel = document.getElementById('selB');
+  [...booths].sort((a, b) => a.tile - b.tile).forEach(b => { const o = document.createElement('option'); o.value = b.name; o.textContent = b.name; sel.appendChild(o); });
+  sel.onchange = () => {
+    const b = booths.find(x => x.name === sel.value); sel.value = ''; sel.blur(); if (!b) return;
+    const top = b.pts[0][1] < -50, fx = (b.pts[2][0] + b.pts[3][0]) / 2, fz = (b.pts[2][1] + b.pts[3][1]) / 2, dir = top ? 1 : -1;   // 위줄은 통로가 +z, 아랫줄은 −z
+    let z = fz + 4.5 * dir; for (const o of [4.5, 3.5, 5.5, 2.5]) { if (walkable(fx, fz + o * dir)) { z = fz + o * dir; break; } }
+    stopTour(); goWalk(fx, z, [fx, 2.2, fz - 9 * dir], 2.2); showCap(b.name + ' 부스', '컨소시엄 바로 가기');
+  }; }
+const placeMini = () => { const mini = document.getElementById('mini'); if (innerWidth > 600) mini.style.top = (document.getElementById('modes').getBoundingClientRect().bottom + 8) + 'px'; else mini.style.top = ''; };
+placeMini(); addEventListener('resize', placeMini);
+
 /* ---------- 화질 바꾸기 (다시 불러옴) ---------- */
 { const bq = document.getElementById('bQ'); bq.textContent = LOW ? '🔅 저화질' : '✨ 고화질'; bq.title = '눌러서 ' + (LOW ? '고화질' : '저화질') + '로 바꾸기';
   bq.onclick = () => { const n = LOW ? 'high' : 'low'; try { localStorage.setItem('cvr_q', n); } catch (e) {} const u = new URL(location.href); u.searchParams.set('q', n); location.replace(u.href); }; }
@@ -1280,7 +1292,9 @@ document.getElementById('bTour').onclick = () => {
 
 /* ---------- 미니맵 ---------- */
 const mini = document.getElementById('mini'), mg = mini.getContext('2d');
-const MB_ALL = { x0: -80, x1: 115, z0: -66, z1: 80 }, MB_HALL = { x0: -74, x1: 74, z0: -66, z1: 64.5 }; let MB = MB_ALL;   // 전시장 안 = 전시장 크게
+const ABBR = { '그린바이오': '그바', '에너지신산업': '에너지', '에코업': '에코', '이차전지': '이차', '반도체소부장': '소부장', '첨단소재나노융합': '나노', '미래자동차': '자동차', '데이터보안활용융합': '보안', '차세대통신': '통신', '사물인터넷': '사물',
+  '바이오헬스': '바헬', '차세대디스플레이': '디플', '차세대반도체': '반도체', '지능형로봇': '로봇', '항공드론': '드론', '실감미디어': '미디어', '빅데이터': '빅데', '인공지능': 'AI' };   // 미니맵 줄임말
+const MB_ALL = { x0: -80, x1: 115, z0: -66, z1: 80 }, MB_HALL = { x0: -73, x1: 73, z0: -63, z1: 1.5 }; let MB = MB_ALL;   // 전시장 안 = 전시장 크게
 const m2 = (x, z) => [(x - MB.x0) / (MB.x1 - MB.x0) * mini.width, (z - MB.z0) / (MB.z1 - MB.z0) * mini.height];
 function rectM(x0, x1, z0, z1, c) { const [a, b] = m2(x0, z0), [d, e] = m2(x1, z1); mg.fillStyle = c; mg.fillRect(a, b, d - a, e - b); }
 function drawMini() {
@@ -1288,11 +1302,12 @@ function drawMini() {
   { const pz0 = mode === 'walk' ? player.z : controls.target.z, px0 = mode === 'walk' ? player.x : controls.target.x; MB = pz0 < 3 && Math.abs(px0) < 75 ? MB_HALL : MB_ALL; }
   rectM(HALL.x0, HALL.x1, HALL.z0, HALL.z1, '#3a4a8c'); rectM(LOBBY.x0, LOBBY.x1, LOBBY.z0, LOBBY.z1, '#cfd8e6'); rectM(MH.x0, MH.x1, MH.z0, MH.z1, '#c9b48d');
   booths.forEach(b => { mg.fillStyle = TILE_COL[b.tile - 1]; mg.beginPath(); b.pts.forEach(([x, z], i) => { const [u, v] = m2(x, z); i ? mg.lineTo(u, v) : mg.moveTo(u, v); }); mg.fill(); });
-  booths.forEach(b => {                                                        // 부스 이름 (세로)
-    const cx = b.pts.reduce((a, p) => a + p[0], 0) / 4, cz = b.pts.reduce((a, p) => a + p[1], 0) / 4, [u, v] = m2(cx, cz), [u1] = m2(b.pts[1][0], 0), [u0] = m2(b.pts[0][0], 0), ww = u1 - u0;
-    const len = Math.abs(m2(0, b.pts[0][1])[1] - m2(0, b.pts[3][1])[1]) * 0.92; let fs = Math.min(ww * 0.62, MB === MB_HALL ? 11 : 6);
-    mg.save(); mg.translate(u, v); mg.rotate(-Math.PI / 2); mg.font = `700 ${fs}px ${FONT}`; while (mg.measureText(b.name).width > len && fs > 4) { fs -= 0.5; mg.font = `700 ${fs}px ${FONT}`; }
-    mg.fillStyle = '#fff'; mg.strokeStyle = 'rgba(0,0,0,.55)'; mg.lineWidth = 2.5; mg.textAlign = 'center'; mg.textBaseline = 'middle'; mg.strokeText(b.name, 0, 0); mg.fillText(b.name, 0, 0); mg.restore();
+  booths.forEach(b => {                                                        // 부스 줄임말 (1~3글자, 한 글자씩 세로로)
+    const cx = b.pts.reduce((a, p) => a + p[0], 0) / 4, cz = b.pts.reduce((a, p) => a + p[1], 0) / 4, [u, v] = m2(cx, cz), ww = m2(b.pts[1][0], 0)[0] - m2(b.pts[0][0], 0)[0];
+    const len = Math.abs(m2(0, b.pts[0][1])[1] - m2(0, b.pts[3][1])[1]) * 0.9, t = ABBR[b.name] || b.name, lat = /^[A-Za-z]+$/.test(t), ch = lat ? [t] : [...t];
+    const fs = lat ? Math.min(ww * 0.85 / (t.length * 0.62), len * 0.5) : Math.min(ww * 0.82, len / ch.length);
+    mg.font = `900 ${fs}px ${FONT}`; mg.fillStyle = '#fff'; mg.strokeStyle = 'rgba(0,0,0,.6)'; mg.lineWidth = Math.max(2, fs * 0.16); mg.lineJoin = 'round'; mg.textAlign = 'center'; mg.textBaseline = 'middle';
+    ch.forEach((c, i) => { const y = v + (i - (ch.length - 1) / 2) * fs; mg.strokeText(c, u, y); mg.fillText(c, u, y); });
   });
   rectM(MH.x0, MH.x0 + 8, 43, 71, '#7a4b2a');
   HOT.forEach(h => { if (h.c === 'c') return; [h.p, ...(h.more || [])].forEach(p => { const [x, y] = m2(p[0], p[2]); mg.fillStyle = COLORS[h.c]; mg.beginPath(); mg.arc(x, y, 3.5, 0, 7); mg.fill(); }); });
@@ -1334,6 +1349,10 @@ renderer.setAnimationLoop((now) => {
       applyWalkCam();
     }
   }
+  if (mode === 'bird' && !tw.on) {
+    const f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0), r = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+    if (f || r) { stopTour(); const d = camera.position.distanceTo(controls.target), sp = Math.max(8, d * 0.7) * dt, fw = new THREE.Vector3(); camera.getWorldDirection(fw); fw.y = 0; fw.normalize(); const rt = new THREE.Vector3(-fw.z, 0, fw.x), mv = fw.multiplyScalar(f * sp).add(rt.multiplyScalar(r * sp)); controls.target.add(mv); camera.position.add(mv); }
+  }
   if (mode === 'bird') controls.update();
   kinT += dt; if (Math.floor(kinT * 12) !== Math.floor((kinT - dt) * 12)) drawKinetic(kinT);
   if (Math.floor(kinT * 4) !== Math.floor((kinT - dt) * 4)) drawSphere(kinT);
@@ -1353,6 +1372,7 @@ birdOnly.visible = true;
 // 주소 끝 #t3 → 투어 3번째 자리, #expo → 구역 (공유·확인용)
 (function () { const h = location.hash.slice(1); if (!h) return; const m = h.match(/^t(\d+)$/);
   if (m && TOUR[+m[1]]) { const [p, l, t, s] = TOUR[+m[1]]; setMode('walk'); player.x = p[0]; player.z = p[1]; [player.yaw, player.pitch] = lookYawPitch(p[0], 1.65, p[1], ...l); applyWalkCam(); showCap(t, s); hideHint(); }
+  else if (/^b=/.test(h)) { const sel = document.getElementById('selB'); sel.value = decodeURIComponent(h.slice(2)); sel.onchange(); }   // #b=부스이름 → 그 부스 앞으로
   else if (/^w=/.test(h)) { const [x, z, lx, ly, lz] = h.slice(2).split(',').map(Number); setMode('walk'); player.x = x; player.z = z; [player.yaw, player.pitch] = lookYawPitch(x, 1.65, z, lx, ly, lz); applyWalkCam(); hideHint(); }   // #w=서있는x,z,볼x,y,z
   else if (/^o=/.test(h)) { const [tx, ty, tz, cx, cy, cz] = h.slice(2).split(',').map(Number); controls.target.set(tx, ty, tz); camera.position.set(cx, cy, cz); }   // #o=볼곳x,y,z,카메라x,y,z
   else if (ZONES[h]) { controls.target.set(...ZONES[h][0]); camera.position.set(...far(...ZONES[h])); }
